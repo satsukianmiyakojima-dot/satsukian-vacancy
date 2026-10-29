@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>空室状況｜民宿さつきあん 宮古島</title>
+<meta name="description" content="宮古島の民宿さつきあんの、お部屋ごとの空室状況です。">
+<style>
+:root { --green: #2f7d4f; --orange: #e8590c; --paper: #fff9ec; --ink: #2b2b2b; --line: #d9d2c0; --full: #b8b8b8; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Yu Gothic", "Meiryo", sans-serif; background: var(--paper); color: var(--ink); line-height: 1.7; font-size: 16px; }
+header { background: var(--green); color: #fff; text-align: center; padding: 28px 16px 24px; }
+header .brand { font-size: 14px; letter-spacing: 3px; }
+header h1 { font-size: 28px; font-weight: 900; margin-top: 4px; letter-spacing: 2px; }
+main { max-width: 720px; margin: 0 auto; padding: 8px 12px 40px; }
+.box { background: #fff; border: 2px solid var(--green); border-radius: 10px; padding: 12px 14px; margin: 16px 0; font-size: 15px; }
+.box b { color: var(--orange); }
+.tel { font-size: 20px; font-weight: 900; color: var(--orange); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; margin: 8px 0 4px; }
+.chip { display: inline-block; min-width: 2.3em; text-align: center; border-radius: 4px; font-size: 11px; font-weight: 700; line-height: 1.5; padding: 0 2px; }
+.ok { background: #dff0e4; color: var(--green); }
+.ng { background: #ececec; color: #888; }
+h2 { font-size: 20px; color: #fff; background: var(--green); border-radius: 6px; padding: 4px 12px; margin: 24px 0 8px; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #fff; }
+th, td { border: 1px solid var(--line); text-align: center; padding: 2px 1px; }
+th { background: #e9f3ec; font-size: 13px; }
+th.sun { color: #c0392b; } th.sat { color: #1971c2; }
+td { height: 70px; vertical-align: top; font-size: 12px; }
+td .d { font-size: 13px; font-weight: 700; display: block; line-height: 1.4; }
+td .chip { display: block; margin: 1px 1px 0; }
+td.past { background: #f4f4f4; color: #bbb; }
+td.past .chip { display: none; }
+td.empty { background: #faf7ee; }
+.note { font-size: 14px; color: #555; margin: 8px 0; }
+footer { text-align: center; font-size: 13px; color: #666; padding: 0 16px 28px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">民宿 さつきあん 宮古島</div>
+  <h1>空室状況</h1>
+</header>
+<main>
+<div class="box">
+  <p>お部屋ごとの空き状況です。<b>この表は、最新ではない場合があります。</b>ご予約の前に、お電話か公式LINEで、空きをご確認ください。</p>
+  <p class="tel"><a href="tel:07083506509" style="color:inherit;text-decoration:none">070-8350-6509</a></p>
+</div>
+<p class="note">最終更新：<span id="upd"></span>　／　表示している期間：<span id="range"></span></p>
+<div class="legend">
+  <span><span class="chip ok">102○</span> 空きあり</span>
+  <span><span class="chip ng">102×</span> 満室・受付停止</span>
+</div>
+<p class="note">「102」「201」「202」は、お部屋の番号です。日付の下に、3部屋ぶんを表示しています。「×」の日は、ご予約をお受けできません。</p>
+<div id="cal"></div>
+<p class="note">・日付は、その日の夜に泊まれるかどうかを表しています。<br>
+・「○」は、ご予約が確定している方がいない日です。ご予約の確定ではありません。<br>
+・表示期間より先の日程は、ご相談ください。</p>
+</main>
+<footer>民宿さつきあん 宮古島（運営：株式会社五月）</footer>
+<script>
+// 更新のしかた：下の DATA だけを書き換える。個人情報は入れない。
+// full：その部屋が埋まっている夜（チェックイン日〜チェックアウト日の前日）。 [開始, 終了] は両方の日を含む。
+var DATA = {
+  updated: "2026-10-29",
+  from: "2026-10-29",
+  to: "2027-03-31",
+  full: {
+    "102": [["2026-10-27","2026-10-30"],["2026-11-02","2026-11-03"],["2026-11-14","2026-11-14"],["2026-11-26","2026-11-27"],["2026-12-12","2026-12-13"],["2027-02-06","2027-02-09"],["2027-03-26","2027-03-29"]],
+    "201": [["2026-10-28","2026-10-29"],["2026-11-02","2026-11-03"],["2026-11-05","2026-11-06"],["2026-11-08","2026-11-08"],["2026-11-11","2026-11-13"],["2026-11-16","2026-11-17"],["2026-11-26","2026-11-27"],["2026-12-12","2026-12-13"],["2026-12-29","2026-12-31"],["2027-02-06","2027-02-09"],["2027-02-26","2027-02-28"],["2027-03-26","2027-03-29"]],
+    "202": [["2026-10-28","2026-10-29"],["2026-11-02","2026-11-03"],["2026-11-26","2026-11-27"],["2026-12-12","2026-12-12"],["2027-02-06","2027-02-09"],["2027-03-26","2027-03-29"]]
+  }
+};
+function p(s){ var a=s.split("-"); return new Date(+a[0], +a[1]-1, +a[2]); }
+function k(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+var full = {};
+Object.keys(DATA.full).forEach(function(r){ full[r] = {}; DATA.full[r].forEach(function(x){ for (var d=p(x[0]); d<=p(x[1]); d.setDate(d.getDate()+1)) full[r][k(d)] = 1; }); });
+var from = p(DATA.from), to = p(DATA.to), now = new Date(); now.setHours(0,0,0,0);
+var first = now > from ? now : from;
+document.getElementById("upd").textContent = DATA.updated.replace(/-/g,"/");
+document.getElementById("range").textContent = DATA.from.replace(/-/g,"/") + " 〜 " + DATA.to.replace(/-/g,"/") + "の宿泊日";
+var out = "", rooms = ["102","201","202"], wk = ["日","月","火","水","木","金","土"];
+for (var m = new Date(first.getFullYear(), first.getMonth(), 1); m <= to; m.setMonth(m.getMonth()+1)) {
+  out += "<h2>" + m.getFullYear() + "年" + (m.getMonth()+1) + "月</h2><table><tr>";
+  wk.forEach(function(w,i){ out += "<th class='"+(i==0?"sun":i==6?"sat":"")+"'>"+w+"</th>"; });
+  out += "</tr>";
+  var last = new Date(m.getFullYear(), m.getMonth()+1, 0).getDate(), row = "", any = false;
+  for (var i=0; i<m.getDay(); i++) row += "<td class='empty'></td>";
+  for (var day=1; day<=last; day++) {
+    var d = new Date(m.getFullYear(), m.getMonth(), day), inRange = d>=first && d<=to;
+    if (inRange) any = true;
+    row += "<td class='"+(inRange?"":"past")+"'><span class='d'>"+day+"</span>";
+    if (inRange) rooms.forEach(function(r){ var f = full[r][k(d)]; row += "<span class='chip "+(f?"ng":"ok")+"'>"+r+(f?"×":"○")+"</span>"; });
+    row += "</td>";
+    if (d.getDay()==6 || day==last) {
+      if (day==last) for (var j=d.getDay(); j<6; j++) row += "<td class='empty'></td>";
+      if (any) out += "<tr>" + row + "</tr>";
+      row = ""; any = false;
+    }
+  }
+  out += "</table>";
+}
+document.getElementById("cal").innerHTML = out;
+</script>
+</body>
+</html>
