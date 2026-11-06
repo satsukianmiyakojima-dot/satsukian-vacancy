@@ -58,8 +58,12 @@ footer { text-align: center; font-size: 13px; color: #666; padding: 0 16px 28px;
 </main>
 <footer>民宿さつきあん 宮古島（運営：株式会社五月）</footer>
 <script>
-// 更新のしかた：下の DATA だけを書き換える。個人情報は入れない。
+// 表示のしくみ（2026-11-06〜）：Googleドライブの予約表の「空室公開」シート（ウェブに公開したCSV）を読んで表示する。
+//   予約表の「宿帳」を直せば、数分で反映される。個人情報は入れない（日付と部屋ごとの0/1だけ）。
+//   表示の終わりの日は、「空室公開」シートの G1。毎月末日の予約枠の開放のときに直す。
+// 下の DATA は、CSV を読めないときの予備（古い内容。表示は「最新ではない場合があります」のまま）。
 // full：その部屋が埋まっている夜（チェックイン日〜チェックアウト日の前日）。 [開始, 終了] は両方の日を含む。
+var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQSw67INzIS2MTfy-cv8Idramv4biMqCDy1CtP1XiOBHzXnHX3wctBYMTvh0_wlTOdZj7m4HJsj-3_h/pub?gid=1471925416&single=true&output=csv";
 var DATA = {
   updated: "2026-11-06",
   from: "2026-11-06",
@@ -70,14 +74,36 @@ var DATA = {
     "202": [["2026-11-09","2026-11-09"],["2026-12-12","2026-12-12"],["2027-02-06","2027-02-09"],["2027-03-19","2027-03-21"],["2027-03-27","2027-03-28"]]
   }
 };
+function parseCsv(txt){
+  var lines = txt.trim().split(/\r?\n/), full = {"102":[],"201":[],"202":[]}, first = "", last = "", n = 0;
+  for (var i=1; i<lines.length; i++) {
+    var c = lines[i].split(",");
+    if (!/^\d{4}-\d\d-\d\d$/.test(c[0])) continue;
+    n++; if (!first) first = c[0]; last = c[0];
+    if (c[1]==="1") full["102"].push([c[0],c[0]]);
+    if (c[2]==="1") full["201"].push([c[0],c[0]]);
+    if (c[3]==="1") full["202"].push([c[0],c[0]]);
+  }
+  if (n < 30) return null;
+  return { updated: "", from: first, to: last, full: full, live: true };
+}
+function load(cb){
+  var done = false;
+  function fin(d){ if (done) return; done = true; cb(d); }
+  setTimeout(function(){ fin(null); }, 6000);
+  try {
+    fetch(CSV_URL, {cache:"no-store"}).then(function(r){ return r.text(); }).then(function(t){ try { fin(parseCsv(t)); } catch(e){ fin(null); } }).catch(function(){ fin(null); });
+  } catch(e) { fin(null); }
+}
+function render(DATA){
 function p(s){ var a=s.split("-"); return new Date(+a[0], +a[1]-1, +a[2]); }
 function k(d){ return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
 var full = {};
 Object.keys(DATA.full).forEach(function(r){ full[r] = {}; DATA.full[r].forEach(function(x){ for (var d=p(x[0]); d<=p(x[1]); d.setDate(d.getDate()+1)) full[r][k(d)] = 1; }); });
 var from = p(DATA.from), to = p(DATA.to), now = new Date(); now.setHours(0,0,0,0);
 var first = now > from ? now : from;
-document.getElementById("upd").textContent = DATA.updated.replace(/-/g,"/");
-document.getElementById("range").textContent = DATA.from.replace(/-/g,"/") + " 〜 " + DATA.to.replace(/-/g,"/") + "の宿泊日";
+document.getElementById("upd").textContent = DATA.live ? (now.getFullYear()+"/"+("0"+(now.getMonth()+1)).slice(-2)+"/"+("0"+now.getDate()).slice(-2)+"（予約表と連動して表示）") : DATA.updated.replace(/-/g,"/");
+document.getElementById("range").textContent = k(first).replace(/-/g,"/") + " 〜 " + DATA.to.replace(/-/g,"/") + "の宿泊日";
 var out = "", rooms = ["102","201","202"], wk = ["日","月","火","水","木","金","土"];
 for (var m = new Date(first.getFullYear(), first.getMonth(), 1); m <= to; m.setMonth(m.getMonth()+1)) {
   out += "<h2>" + m.getFullYear() + "年" + (m.getMonth()+1) + "月</h2><table><tr>";
@@ -100,6 +126,8 @@ for (var m = new Date(first.getFullYear(), first.getMonth(), 1); m <= to; m.setM
   out += "</table>";
 }
 document.getElementById("cal").innerHTML = out;
+}
+load(function(d){ render(d || DATA); });
 </script>
 </body>
 </html>
